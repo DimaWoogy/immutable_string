@@ -2,6 +2,9 @@ project(immutable_string)
 
 cmake_minimum_required(VERSION 3.2)
 
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIR})
+
 if (MSVC)
   add_compile_options(/W4)
 else()

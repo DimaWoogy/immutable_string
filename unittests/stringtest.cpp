@@ -1,5 +1,3 @@
-#include "filled_memory_allocator.hpp"
-
 #include "catch2/catch.hpp"
 #include "immutable_string/string.hpp"
 
