@@ -16,12 +16,28 @@ SCENARIO("empty string construction", "[string]") {
     string str;
     REQUIRE_EMPTY(str);
   }
-  GIVEN("string constructed from empty c_str") {
+  GIVEN("string constructed from empty cstr") {
     string str{""};
     REQUIRE_EMPTY(str);
   }
-  GIVEN("string constructed from non-empty c_str with count = 0") {
+  GIVEN("string constructed from non-empty cstr with count = 0") {
     string str{"test", 0};
     REQUIRE_EMPTY(str);
   }
 }
+
+SCENARIO("non-empty string construction", "[string]") {
+  GIVEN("string constructed from test cstr") {
+    string str{ "test" };
+
+    REQUIRE(str.size() == 4);
+    REQUIRE(std::strcmp(str.c_str(), "test") == 0);
+  }
+  GIVEN("string constructed from test cstr with count = 2") {
+    string str{ "test", 2 };
+
+    REQUIRE(str.size() == 2);
+    REQUIRE(std::strcmp(str.c_str(), "te") == 0);
+  }
+}
+
