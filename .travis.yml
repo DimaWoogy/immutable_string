@@ -9,7 +9,7 @@ addons:
       - boost-latest
     packages:
       - g++-7
-      - libboost1.67-all-dev
+      - libboost-all-dev
       - cmake
 
 script:
