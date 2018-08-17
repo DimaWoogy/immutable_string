@@ -27,6 +27,7 @@ class basic_string {
 
   basic_string();
   explicit basic_string(const Allocator& alloc);
+  basic_string(size_type count, CharT ch, const Allocator& alloc = Allocator());
   basic_string(const CharT* s, const Allocator& alloc = Allocator());
   basic_string(const CharT* s, size_type count,
                const Allocator& alloc = Allocator());
@@ -48,6 +49,13 @@ using wstring = basic_string<wchar_t>;
 
 template <class CharT, class Traits, class Allocator>
 basic_string<CharT, Traits, Allocator>::basic_string() : basic_string("") {}
+
+template <class CharT, class Traits, class Allocator>
+basic_string<CharT, Traits, Allocator>::basic_string(size_type count, CharT ch,
+                                                     const Allocator& alloc)
+    : m_data(boost::allocate_shared<CharT[]>(alloc, count + 1)), m_size(count) {
+  Traits::assign(m_data.get(), count, ch);
+}
 
 template <class CharT, class Traits, class Allocator>
 basic_string<CharT, Traits, Allocator>::basic_string(const Allocator& alloc)
