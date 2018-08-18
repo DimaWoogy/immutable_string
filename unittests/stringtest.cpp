@@ -116,3 +116,32 @@ SCENARIO("string is movable", "[string]") {
     }
   }
 }
+
+SCENARIO("string's element access", "[string]") {
+  GIVEN("some test string") {
+    string test_str{"abcd"};
+
+    WHEN("accessed pos < size()") {
+      THEN("valid character is returned") {
+        REQUIRE(test_str.front() == 'a');
+        REQUIRE(test_str.at(1) == 'b');
+        REQUIRE(test_str[2] == 'c');
+        REQUIRE(test_str.back() == 'd');
+      }
+    }
+    WHEN("accessed pos == size()") {
+      THEN("at throws") {
+        REQUIRE_THROWS_AS(test_str.at(4), std::out_of_range);
+      }
+      THEN("operator[] returns 0") {
+        REQUIRE(test_str[4] == 0);
+      }
+    }
+    WHEN("accessed pos > size()") {
+      THEN("at throws") {
+        REQUIRE_THROWS_AS(test_str.at(5), std::out_of_range);
+        REQUIRE_THROWS_AS(test_str.at(100), std::out_of_range);
+      }
+    }
+  }
+}

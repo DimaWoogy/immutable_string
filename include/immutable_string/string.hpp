@@ -32,12 +32,19 @@ class basic_string {
   basic_string(const CharT* s, size_type count,
                const Allocator& alloc = Allocator());
 
+  const_reference operator[](size_type pos) const noexcept;
+  const_reference at(size_type pos) const;
+  const_reference front() const noexcept { return (*this)[0]; }
+  const_reference back() const noexcept { return (*this)[size() - 1]; }
   const CharT* data() const noexcept { return m_data.get(); }
   const CharT* c_str() const noexcept { return data(); }
 
   bool empty() const noexcept { return m_size == 0; }
   size_type size() const noexcept { return m_size; }
   size_type length() const noexcept { return size(); }
+
+ private:
+  void _throw_out_of_range() const { throw std::out_of_range("basic_string"); }
 
  private:
   boost::shared_ptr<CharT[]> m_data;
@@ -74,6 +81,20 @@ basic_string<CharT, Traits, Allocator>::basic_string(const CharT* s,
   // allocate_shared returns value initialized array
   // so, we don't need to fill last element with zero
   Traits::copy(m_data.get(), s, count);
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::const_reference
+    basic_string<CharT, Traits, Allocator>::operator[](size_type pos) const
+    noexcept {
+  return data()[pos];
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::const_reference
+basic_string<CharT, Traits, Allocator>::at(size_type pos) const {
+  if (pos >= size()) _throw_out_of_range();
+  return (*this)[pos];
 }
 
 }  // namespace immutable_string
