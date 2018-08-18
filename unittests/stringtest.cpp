@@ -2,8 +2,18 @@
 #include "immutable_string/string.hpp"
 
 #include <cstring>
+#include <type_traits>
 
 using namespace immutable_string;
+
+static_assert(std::is_nothrow_copy_constructible<string>::value,
+              "string shall be nothrow copy-constructible");
+static_assert(std::is_nothrow_copy_assignable<string>::value,
+              "string shall be nothrow copy-assignable");
+static_assert(std::is_nothrow_move_constructible<string>::value,
+              "string shall be nothrow move-constructible");
+static_assert(std::is_nothrow_move_assignable<string>::value,
+              "string shall be nothrow move-assignable");
 
 #define REQUIRE_EMPTY(STR)    \
   REQUIRE(STR.size() == 0);   \
@@ -48,5 +58,61 @@ SCENARIO("non-empty string construction", "[string]") {
 
     REQUIRE(str.size() == 5);
     REQUIRE(std::strcmp(str.c_str(), "11111") == 0);
+  }
+}
+
+SCENARIO("string is copyable without new allocations", "[string]") {
+  GIVEN("some test string") {
+    string test_str{"test"};
+
+    WHEN("new string is copy-constructed") {
+      string new_str{test_str};
+
+      THEN("they point to the same memory") {
+        REQUIRE(test_str.data() == new_str.data());
+      }
+      THEN("they have the same size") {
+        REQUIRE(test_str.size() == new_str.size());
+      }
+    }
+    WHEN("new string is created and test string is assigned to it") {
+      string new_str;
+      new_str = test_str;
+
+      THEN("they point to the same memory") {
+        REQUIRE(test_str.data() == new_str.data());
+      }
+      THEN("they have the same size") {
+        REQUIRE(test_str.size() == new_str.size());
+      }
+    }
+  }
+}
+
+SCENARIO("string is movable", "[string]") {
+  GIVEN("some test string") {
+    string test_str{"test"};
+
+    WHEN("new string is move-constructed") {
+      string new_str{std::move(test_str)};
+
+      THEN("new string has test string") {
+        REQUIRE(std::strcmp(new_str.data(), "test") == 0);
+      }
+      THEN("test string is unusable and point to nullptr") {
+        REQUIRE(test_str.data() == nullptr);
+      }
+    }
+    WHEN("new string is creeated and test string is move-assigned to it") {
+      string new_str;
+      new_str = std::move(test_str);
+
+      THEN("new string has test string") {
+        REQUIRE(std::strcmp(new_str.data(), "test") == 0);
+      }
+      THEN("test string is unusable and point to nullptr") {
+        REQUIRE(test_str.data() == nullptr);
+      }
+    }
   }
 }
