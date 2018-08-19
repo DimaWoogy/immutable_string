@@ -43,6 +43,16 @@ class basic_string {
   size_type size() const noexcept { return m_size; }
   size_type length() const noexcept { return size(); }
 
+  iterator begin() const noexcept;
+  iterator end() const noexcept;
+  reverse_iterator rbegin() const noexcept;
+  reverse_iterator rend() const noexcept;
+
+  iterator cbegin() const noexcept { return begin(); }
+  iterator cend() const noexcept { return end(); }
+  reverse_iterator crbegin() const noexcept { return rbegin(); }
+  reverse_iterator crend() const noexcept { return rend(); }
+
  private:
   void _throw_out_of_range() const { throw std::out_of_range("basic_string"); }
 
@@ -95,6 +105,30 @@ typename basic_string<CharT, Traits, Allocator>::const_reference
 basic_string<CharT, Traits, Allocator>::at(size_type pos) const {
   if (pos >= size()) _throw_out_of_range();
   return (*this)[pos];
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::iterator
+basic_string<CharT, Traits, Allocator>::begin() const noexcept {
+  return m_data.get();
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::iterator
+basic_string<CharT, Traits, Allocator>::end() const noexcept {
+  return m_data.get() + size();
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::reverse_iterator
+basic_string<CharT, Traits, Allocator>::rbegin() const noexcept {
+  return reverse_iterator{end()};
+}
+
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::reverse_iterator
+basic_string<CharT, Traits, Allocator>::rend() const noexcept {
+  return reverse_iterator{begin()};
 }
 
 }  // namespace immutable_string

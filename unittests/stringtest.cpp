@@ -145,3 +145,28 @@ SCENARIO("string's element access", "[string]") {
     }
   }
 }
+
+SCENARIO("iterators usage") {
+  GIVEN("some test string") {
+    string test_str{"abcd"};
+
+    WHEN("compared to the same string by std::equal") {
+      string test_str2{"abcd"};
+      THEN("thy are equal by begin/end iterators") {
+        REQUIRE(std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
+      }
+      THEN("thy are not equal by rbegin/rend iterators") {
+        REQUIRE(!std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
+      }
+    }
+    WHEN("compared to reversed string by std::equal") {
+      string test_str2{"dcba"};
+      THEN("thy are not equal by begin/end iterators") {
+        REQUIRE(!std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
+      }
+      THEN("thy are equal by rbegin/rend iterators") {
+        REQUIRE(std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
+      }
+    }
+  }
+}
