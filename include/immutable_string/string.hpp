@@ -53,6 +53,8 @@ class basic_string {
   reverse_iterator crbegin() const noexcept { return rbegin(); }
   reverse_iterator crend() const noexcept { return rend(); }
 
+  int compare(const basic_string& str) const noexcept;
+
  private:
   void _throw_out_of_range() const { throw std::out_of_range("basic_string"); }
 
@@ -130,5 +132,51 @@ typename basic_string<CharT, Traits, Allocator>::reverse_iterator
 basic_string<CharT, Traits, Allocator>::rend() const noexcept {
   return reverse_iterator{begin()};
 }
+
+template <class CharT, class Traits, class Allocator>
+int basic_string<CharT, Traits, Allocator>::compare(
+    const basic_string<CharT, Traits, Allocator>& str) const noexcept {
+  const auto rlen = std::min(size(), str.size());
+  const auto res = Traits::compare(data(), str.data(), rlen);
+  if (res == 0) return size() - str.size();
+  return res;
+}
+
+// comparators
+template <class CharT, class Traits, class Alloc>
+bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return lhs.size() == rhs.size() && lhs.compare(rhs) == 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return !(lhs == rhs);
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator<(const basic_string<CharT, Traits, Alloc>& lhs,
+               const basic_string<CharT, Traits, Alloc>& rhs) {
+  return lhs.compare(rhs) < 0;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator<=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return lhs.compare(rhs) <= 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator>(const basic_string<CharT, Traits, Alloc>& lhs,
+               const basic_string<CharT, Traits, Alloc>& rhs) {
+  return lhs.compare(rhs) > 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return lhs.compare(rhs) >= 0;
+}
+// TODO: add operators to compare with const CharT*
 
 }  // namespace immutable_string

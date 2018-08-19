@@ -170,3 +170,40 @@ SCENARIO("iterators usage") {
     }
   }
 }
+
+SCENARIO("string comparison") {
+  GIVEN("str1 == str2") {
+    string str1{"abcd"};
+    string str2{"abcd"};
+    
+    REQUIRE(str1 == str2);
+    REQUIRE(str1 <= str2);
+    REQUIRE(str1 >= str2);
+    REQUIRE_FALSE(str1 != str2);
+    REQUIRE_FALSE(str1 < str2);
+    REQUIRE_FALSE(str1 > str2);
+  }
+  GIVEN("str1 < str2") {
+    string str1{"abcd"};
+    string str2{"abcde"};
+
+    REQUIRE(str1 < str2);
+    REQUIRE(str1 <= str2);
+    REQUIRE(str1 != str2);
+    REQUIRE_FALSE(str1 == str2);
+    REQUIRE_FALSE(str1 > str2);
+    REQUIRE_FALSE(str1 >= str2);
+  }
+  GIVEN("str1 > str2") {
+    string str1{"abcd"};
+    string str2{"abcc"};
+
+    REQUIRE(str1 > str2);
+    REQUIRE(str1 >= str2);
+    REQUIRE(str1 != str2);
+    REQUIRE_FALSE(str1 == str2);
+    REQUIRE_FALSE(str1 < str2);
+    REQUIRE_FALSE(str1 <= str2);
+  }
+}
+
