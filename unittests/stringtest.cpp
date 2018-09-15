@@ -1,3 +1,4 @@
+#include "allocator_with_count.hpp"
 #include "catch2/catch.hpp"
 #include "immutable_string/string.hpp"
 
@@ -5,6 +6,9 @@
 #include <type_traits>
 
 using namespace immutable_string;
+
+using string_count_alloc =
+    basic_string<char, std::char_traits<char>, allocator_with_count<char>>;
 
 static_assert(std::is_nothrow_copy_constructible<string>::value,
               "string shall be nothrow copy-constructible");
@@ -62,11 +66,15 @@ SCENARIO("non-empty string construction", "[string]") {
 }
 
 SCENARIO("string is copyable without new allocations", "[string]") {
-  GIVEN("some test string") {
-    string test_str{"test"};
+  GIVEN("some test string constructed with allocator with count") {
+    int allocated_count = 0;
+    auto allocator = allocator_with_count<char>{allocated_count};
+    string_count_alloc test_str{"test", allocator};
+
+    REQUIRE(allocated_count == 1);
 
     WHEN("new string is copy-constructed") {
-      string new_str{test_str};
+      string_count_alloc new_str{test_str};
 
       THEN("they point to the same memory") {
         REQUIRE(test_str.data() == new_str.data());
@@ -74,9 +82,12 @@ SCENARIO("string is copyable without new allocations", "[string]") {
       THEN("they have the same size") {
         REQUIRE(test_str.size() == new_str.size());
       }
+      THEN("allocated count is 1") { REQUIRE(allocated_count == 1); }
     }
     WHEN("new string is created and test string is assigned to it") {
-      string new_str;
+      string_count_alloc new_str{allocator};
+      REQUIRE(allocated_count == 2);
+
       new_str = test_str;
 
       THEN("they point to the same memory") {
@@ -85,16 +96,19 @@ SCENARIO("string is copyable without new allocations", "[string]") {
       THEN("they have the same size") {
         REQUIRE(test_str.size() == new_str.size());
       }
+      THEN("allocated count is 2") { REQUIRE(allocated_count == 2); }
     }
   }
 }
 
 SCENARIO("string is movable", "[string]") {
   GIVEN("some test string") {
-    string test_str{"test"};
+    int allocated_count = 0;
+    auto allocator = allocator_with_count<char>{allocated_count};
+    string_count_alloc test_str{"test", allocator};
 
     WHEN("new string is move-constructed") {
-      string new_str{std::move(test_str)};
+      string_count_alloc new_str{std::move(test_str)};
 
       THEN("new string has test string") {
         REQUIRE(std::strcmp(new_str.data(), "test") == 0);
@@ -102,9 +116,12 @@ SCENARIO("string is movable", "[string]") {
       THEN("test string is unusable and point to nullptr") {
         REQUIRE(test_str.data() == nullptr);
       }
+      THEN("allocated count is 1") { REQUIRE(allocated_count == 1); }
     }
     WHEN("new string is creeated and test string is move-assigned to it") {
-      string new_str;
+      string_count_alloc new_str{allocator};
+      REQUIRE(allocated_count == 2);
+
       new_str = std::move(test_str);
 
       THEN("new string has test string") {
@@ -113,6 +130,7 @@ SCENARIO("string is movable", "[string]") {
       THEN("test string is unusable and point to nullptr") {
         REQUIRE(test_str.data() == nullptr);
       }
+      THEN("allocated count is 2") { REQUIRE(allocated_count == 2); }
     }
   }
 }
@@ -133,9 +151,7 @@ SCENARIO("string's element access", "[string]") {
       THEN("at throws") {
         REQUIRE_THROWS_AS(test_str.at(4), std::out_of_range);
       }
-      THEN("operator[] returns 0") {
-        REQUIRE(test_str[4] == 0);
-      }
+      THEN("operator[] returns 0") { REQUIRE(test_str[4] == 0); }
     }
     WHEN("accessed pos > size()") {
       THEN("at throws") {
@@ -153,19 +169,23 @@ SCENARIO("iterators usage") {
     WHEN("compared to the same string by std::equal") {
       string test_str2{"abcd"};
       THEN("thy are equal by begin/end iterators") {
-        REQUIRE(std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
+        REQUIRE(
+            std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
       }
       THEN("thy are not equal by rbegin/rend iterators") {
-        REQUIRE(!std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
+        REQUIRE(
+            !std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
       }
     }
     WHEN("compared to reversed string by std::equal") {
       string test_str2{"dcba"};
       THEN("thy are not equal by begin/end iterators") {
-        REQUIRE(!std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
+        REQUIRE(
+            !std::equal(test_str.begin(), test_str.end(), test_str2.begin()));
       }
       THEN("thy are equal by rbegin/rend iterators") {
-        REQUIRE(std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
+        REQUIRE(
+            std::equal(test_str.rbegin(), test_str.rend(), test_str2.begin()));
       }
     }
   }
@@ -175,7 +195,7 @@ SCENARIO("string comparison") {
   GIVEN("str1 == str2") {
     string str1{"abcd"};
     string str2{"abcd"};
-    
+
     REQUIRE(str1 == str2);
     REQUIRE(str1 <= str2);
     REQUIRE(str1 >= str2);
