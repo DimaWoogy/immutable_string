@@ -227,3 +227,71 @@ SCENARIO("string comparison") {
   }
 }
 
+SCENARIO("string vs const char* comparison") {
+  GIVEN("str == abcd") {
+    int allocated_count = 0;
+    auto allocator = allocator_with_count<char>{allocated_count};
+    string_count_alloc str{"abcd", allocator};
+
+    REQUIRE(str.compare("abcd") == 0);
+    REQUIRE(str == "abcd");
+    REQUIRE(str <= "abcd");
+    REQUIRE(str >= "abcd");
+    REQUIRE_FALSE(str > "abcd");
+    REQUIRE_FALSE(str < "abcd");
+    REQUIRE_FALSE(str != "abcd");
+
+    REQUIRE("abcd" == str);
+    REQUIRE("abcd" <= str);
+    REQUIRE("abcd" >= str);
+    REQUIRE_FALSE("abcd" < str);
+    REQUIRE_FALSE("abcd" > str);
+    REQUIRE_FALSE("abcd" != str);
+
+    REQUIRE(allocated_count == 1);
+  }
+  GIVEN("str < abcde") {
+    int allocated_count = 0;
+    auto allocator = allocator_with_count<char>{allocated_count};
+    string_count_alloc str{"abcd", allocator};
+
+    REQUIRE(str.compare("abcde") < 0);
+    REQUIRE(str != "abcde");
+    REQUIRE(str < "abcde");
+    REQUIRE(str <= "abcde");
+    REQUIRE_FALSE(str > "abcde");
+    REQUIRE_FALSE(str >= "abcde");
+    REQUIRE_FALSE(str == "abcde");
+
+    REQUIRE("abcde" != str);
+    REQUIRE("abcde" > str);
+    REQUIRE("abcde" >= str);
+    REQUIRE_FALSE("abcde" < str);
+    REQUIRE_FALSE("abcde" <= str);
+    REQUIRE_FALSE("abcde" == str);
+
+    REQUIRE(allocated_count == 1);
+  }
+  GIVEN("str > abcc") {
+    int allocated_count = 0;
+    auto allocator = allocator_with_count<char>{allocated_count};
+    string_count_alloc str{"abcd", allocator};
+
+    REQUIRE(str.compare("abcc") > 0);
+    REQUIRE(str != "abcc");
+    REQUIRE(str > "abcc");
+    REQUIRE(str >= "abcc");
+    REQUIRE_FALSE(str < "abcc");
+    REQUIRE_FALSE(str <= "abcc");
+    REQUIRE_FALSE(str == "abcc");
+
+    REQUIRE("abcc" != str);
+    REQUIRE("abcc" < str);
+    REQUIRE("abcc" <= str);
+    REQUIRE_FALSE("abcc" > str);
+    REQUIRE_FALSE("abcc" >= str);
+    REQUIRE_FALSE("abcc" == str);
+
+    REQUIRE(allocated_count == 1);
+  }
+}

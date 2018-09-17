@@ -54,6 +54,10 @@ class basic_string {
   reverse_iterator crend() const noexcept { return rend(); }
 
   int compare(const basic_string& str) const noexcept;
+  int compare(const CharT* s) const noexcept;
+  int compare(size_type pos1, size_type count1, const CharT* s) const noexcept;
+  int compare(size_type pos1, size_type count1, const CharT* s,
+              size_type count2) const noexcept;
 
  private:
   void _throw_out_of_range() const { throw std::out_of_range("basic_string"); }
@@ -133,12 +137,33 @@ basic_string<CharT, Traits, Allocator>::rend() const noexcept {
   return reverse_iterator{begin()};
 }
 
+// compare members
 template <class CharT, class Traits, class Allocator>
 int basic_string<CharT, Traits, Allocator>::compare(
     const basic_string<CharT, Traits, Allocator>& str) const noexcept {
-  const auto rlen = std::min(size(), str.size());
-  const auto res = Traits::compare(data(), str.data(), rlen);
-  if (res == 0) return size() - str.size();
+  return compare(0, size(), str.data(), str.size());
+}
+template <class CharT, class Traits, class Allocator>
+int basic_string<CharT, Traits, Allocator>::compare(const CharT* s) const
+    noexcept {
+  return compare(0, size(), s);
+}
+template <class CharT, class Traits, class Allocator>
+int basic_string<CharT, Traits, Allocator>::compare(size_type pos1,
+                                                    size_type count1,
+                                                    const CharT* s) const
+    noexcept {
+  return compare(pos1, count1, s, Traits::length(s));
+}
+template <class CharT, class Traits, class Allocator>
+int basic_string<CharT, Traits, Allocator>::compare(size_type pos1,
+                                                    size_type count1,
+                                                    const CharT* s,
+                                                    size_type count2) const
+    noexcept {
+  const auto rlen = std::min(count1, count2);
+  const auto res = Traits::compare(data() + pos1, s, rlen);
+  if (res == 0) return count1 - count2;
   return res;
 }
 
@@ -177,6 +202,70 @@ bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
                 const basic_string<CharT, Traits, Alloc>& rhs) {
   return lhs.compare(rhs) >= 0;
 }
-// TODO: add operators to compare with const CharT*
+
+template <class CharT, class Traits, class Alloc>
+bool operator==(const basic_string<CharT, Traits, Alloc>& lhs,
+                const CharT* rhs) {
+  const auto rlen = Traits::length(rhs);
+  return lhs.size() == rlen && lhs.compare(0, lhs.size(), rhs, rlen) == 0;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator!=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const CharT* rhs) {
+  return !(lhs == rhs);
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator==(const CharT* lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return rhs == lhs;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator!=(const CharT* lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return !(rhs == lhs);
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator<(const basic_string<CharT, Traits, Alloc>& lhs,
+               const CharT* rhs) {
+  return lhs.compare(rhs) < 0;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator<=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const CharT* rhs) {
+  return lhs.compare(rhs) <= 0;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator>(const basic_string<CharT, Traits, Alloc>& lhs,
+               const CharT* rhs) {
+  return lhs.compare(rhs) > 0;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator>=(const basic_string<CharT, Traits, Alloc>& lhs,
+                const CharT* rhs) {
+  return lhs.compare(rhs) >= 0;
+}
+
+template <class CharT, class Traits, class Alloc>
+bool operator<(const CharT* lhs,
+               const basic_string<CharT, Traits, Alloc>& rhs) {
+  return rhs > lhs;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator<=(const CharT* lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return rhs >= lhs;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator>(const CharT* lhs,
+               const basic_string<CharT, Traits, Alloc>& rhs) {
+  return rhs < lhs;
+}
+template <class CharT, class Traits, class Alloc>
+bool operator>=(const CharT* lhs,
+                const basic_string<CharT, Traits, Alloc>& rhs) {
+  return rhs <= lhs;
+}
 
 }  // namespace immutable_string
