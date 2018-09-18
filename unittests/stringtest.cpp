@@ -295,3 +295,26 @@ SCENARIO("string vs const char* comparison") {
     REQUIRE(allocated_count == 1);
   }
 }
+
+SCENARIO("find substring in a string") {
+  GIVEN("test string") {
+    string test_str{"aaabbbcccddd"};
+
+    WHEN("correct substring is given") {
+      string test_substr{"cddd"};
+      REQUIRE(test_str.find(test_substr) == 8);
+      REQUIRE(test_str.find("bbbc") == 3);
+      REQUIRE(test_str.find('a') == 0);
+      REQUIRE(test_str.find('a', 1) == 1);
+      REQUIRE(test_str.find("ad", 0, 1) == 0);
+    }
+
+    WHEN("incorrect substring is given") {
+      string test_substr{"dc"};
+      REQUIRE(test_str.find(test_substr) == string::npos);
+      REQUIRE(test_str.find("aba") == string::npos);
+      REQUIRE(test_str.find('e') == string::npos);
+      REQUIRE(test_str.find('a', 3) == string::npos);
+    }
+  }
+}

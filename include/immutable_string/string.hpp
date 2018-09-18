@@ -53,6 +53,11 @@ class basic_string {
   reverse_iterator crbegin() const noexcept { return rbegin(); }
   reverse_iterator crend() const noexcept { return rend(); }
 
+  size_type find(const basic_string& str, size_type pos = 0) const;
+  size_type find(const CharT* s, size_type pos, size_type count) const;
+  size_type find(const CharT* s, size_type pos = 0) const;
+  size_type find(CharT ch, size_type pos = 0) const;
+
   int compare(const basic_string& str) const noexcept;
   int compare(const CharT* s) const noexcept;
   int compare(size_type pos1, size_type count1, const CharT* s) const noexcept;
@@ -69,6 +74,10 @@ class basic_string {
 
 using string = basic_string<char>;
 using wstring = basic_string<wchar_t>;
+
+template <class CharT, class Traits, class Allocator>
+const typename basic_string<CharT, Traits, Allocator>::size_type
+    basic_string<CharT, Traits, Allocator>::npos;
 
 template <class CharT, class Traits, class Allocator>
 basic_string<CharT, Traits, Allocator>::basic_string() : basic_string("") {}
@@ -137,7 +146,43 @@ basic_string<CharT, Traits, Allocator>::rend() const noexcept {
   return reverse_iterator{begin()};
 }
 
-// compare members
+// find
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::size_type
+basic_string<CharT, Traits, Allocator>::find(const basic_string& str,
+                                             size_type pos) const {
+  return find(str.data(), pos, str.size());
+}
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::size_type
+basic_string<CharT, Traits, Allocator>::find(const CharT* s,
+                                             size_type pos) const {
+  return find(s, pos, Traits::length(s));
+}
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::size_type
+basic_string<CharT, Traits, Allocator>::find(CharT ch, size_type pos) const {
+  return find(&ch, pos, 1);
+}
+template <class CharT, class Traits, class Allocator>
+typename basic_string<CharT, Traits, Allocator>::size_type
+basic_string<CharT, Traits, Allocator>::find(const CharT* s, size_type pos,
+                                             size_type count) const {
+  const auto is_equal = [s, count](const CharT* s2) {
+    for (size_type i = 0; i < count; ++i) {
+      if (s[i] != s2[i]) return false;
+    }
+    return true;
+  };
+
+  while (pos + count <= size()) {
+    if (is_equal(data() + pos)) return pos;
+    ++pos;
+  }
+  return npos;
+}
+
+// compare
 template <class CharT, class Traits, class Allocator>
 int basic_string<CharT, Traits, Allocator>::compare(
     const basic_string<CharT, Traits, Allocator>& str) const noexcept {
