@@ -37,6 +37,7 @@ class allocator_with_count {
     ++m_allocated_count;
     return res;
   }
+  T* allocate(std::size_t n, const void*) { return allocate(n); }
 
   void deallocate(T* p, std::size_t) { ::operator delete(p); }
 
